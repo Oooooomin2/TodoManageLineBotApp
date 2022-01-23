@@ -66,7 +66,9 @@
                       ></v-text-field>
                     </v-col>
                     <v-col cols="12">
-                      <v-btn block @click="postTodo">登録</v-btn>
+                      <v-btn block @click="postTodo" :disabled="title === ''"
+                        >登録</v-btn
+                      >
                     </v-col>
                   </v-row>
                 </v-col>
@@ -84,39 +86,33 @@
 
 <script>
 import axios from "axios";
+import { commonData } from "../mixins/common";
 
 export default {
   name: "Create",
   props: ["todos"],
-  data: () => ({
-    baseUrl: "APIエンドポイント",
-    implementationDate: "",
-    menu: false,
-    title: "",
-    dialog: false,
-    limitImplementationDate: ''
-  }),
+  mixins: [commonData],
+  data() {
+    return {
+      implementationDate: "",
+      menu: false,
+      title: "",
+      dialog: false,
+      limitImplementationDate: "",
+    };
+  },
   created() {
     const today = new Date();
-    const year = today.getFullYear();
-    const month = ("0" + (today.getMonth() + 1)).slice(-2);
-    const date = ("0" + today.getDate()).slice(-2);
-    this.implementationDate = `${year}-${month}-${date}`;
+    this.implementationDate = this.changeDateToStr(today);
 
-    const limitDate = new Date(
-      new Date().setDate(new Date().getDate() + 7)
-    );
-
-    const limitDateYear = limitDate.getFullYear();
-    const limitDateMonth = ("0" + (limitDate.getMonth() + 1)).slice(-2);
-    const limitDateDate = ("0" + limitDate.getDate()).slice(-2);
-    this.limitImplementationDate = `${limitDateYear}-${limitDateMonth}-${limitDateDate}`;
+    const limitDate = new Date(today.setDate(today.getDate() + 7));
+    this.limitImplementationDate = this.changeDateToStr(limitDate);
   },
   methods: {
     postTodo() {
       const todo = {
         Title: this.title,
-        Status: "未",
+        Status: this.status.undo,
         ImplementationDate: this.implementationDate,
       };
 

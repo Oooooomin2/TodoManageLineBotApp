@@ -10,13 +10,13 @@
                 block
                 fab
                 small
-                :dark="todo.Status !== '完'"
+                :dark="!isStatusComplete(todo.Status)"
                 class="red darken-3"
                 @click="completeTodo(todo.Title)"
-                :disabled="todo.Status === '完'"
-                ><v-icon v-if="todo.Status === '完'"
+                :disabled="isStatusComplete(todo.Status)"
+                ><v-icon v-if="isStatusComplete(todo.Status)"
                   >mdi-check-bold</v-icon
-                ><v-icon v-if="todo.Status !== '完'">mdi-weight-lifter</v-icon></v-btn
+                ><v-icon v-else>mdi-weight-lifter</v-icon></v-btn
               >
             </v-col>
           </v-row>
@@ -29,15 +29,12 @@
 
 <script>
 import axios from "axios";
+import { commonData } from "../mixins/common";
 
 export default {
   name: "Index",
   props: ["todos"],
-  data() {
-    return {
-      baseUrl: "APIエンドポイント",
-    };
-  },
+  mixins: [commonData],
   created() {
     let vm = this;
     axios.get(`${this.baseUrl}/api/todos`).then(function (response) {
@@ -50,10 +47,13 @@ export default {
     });
   },
   methods: {
+    isStatusComplete: function (todo) {
+      return todo === this.status.complete;
+    },
     completeTodo: function (title) {
       const todo = {
         Title: title,
-        Status: "完",
+        Status: this.status.complete,
         ImplementationDate: new Date(
           Date.now() - new Date().getTimezoneOffset() * 60000
         )
@@ -67,7 +67,7 @@ export default {
         .then(function () {
           vm.todos.map(function (v) {
             if (v.Title === title) {
-              v.Status = "完";
+              v.Status = vm.status.complete;
             }
           });
         })
